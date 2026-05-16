@@ -1,0 +1,1678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Datastraw Support CRM</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    /* =========================================================
+       RESET & BASE
+    ========================================================= */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg           : #0f1117;
+      --bg2          : #161b26;
+      --bg3          : #1c2333;
+      --border       : #2a3146;
+      --border-light : #3a4460;
+      --text         : #e2e8f0;
+      --text-muted   : #8892a4;
+      --text-faint   : #4a5568;
+      --accent       : #4f8ef7;
+      --accent-glow  : rgba(79,142,247,0.15);
+      --green        : #34d399;
+      --yellow       : #fbbf24;
+      --red          : #f87171;
+      --orange       : #fb923c;
+      --purple       : #a78bfa;
+      --font         : 'DM Sans', sans-serif;
+      --mono         : 'DM Mono', monospace;
+      --radius       : 8px;
+      --radius-lg    : 12px;
+      --shadow       : 0 4px 24px rgba(0,0,0,0.4);
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 14px;
+      line-height: 1.6;
+      overflow: hidden;
+    }
+
+    /* =========================================================
+       LAYOUT — three panel grid
+    ========================================================= */
+    .app {
+      display: grid;
+      grid-template-rows: 52px 1fr;
+      grid-template-columns: 300px 1fr 280px;
+      grid-template-areas:
+        "header header header"
+        "list   detail insights";
+      height: 100vh;
+    }
+
+    /* =========================================================
+       HEADER
+    ========================================================= */
+    .header {
+      grid-area: header;
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      gap: 16px;
+    }
+
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header-logo {
+      width: 28px;
+      height: 28px;
+      background: var(--accent);
+      border-radius: 7px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 600;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .header-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: -0.3px;
+    }
+
+    .header-subtitle {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .header-spacer { flex: 1; }
+
+    .header-stat {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+    }
+
+    .header-stat-num {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--accent);
+      font-family: var(--mono);
+      line-height: 1;
+    }
+
+    .header-stat-label {
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .header-divider {
+      width: 1px;
+      height: 28px;
+      background: var(--border);
+      margin: 0 4px;
+    }
+
+    .btn-new {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      padding: 7px 16px;
+      font-family: var(--font);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: opacity 0.15s;
+    }
+
+    .btn-new:hover { opacity: 0.85; }
+    .btn-export {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+  padding: 7px 14px;
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-export:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+    /* =========================================================
+       LEFT PANEL — ticket list
+    ========================================================= */
+    .panel-list {
+      grid-area: list;
+      background: var(--bg2);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .panel-list-header {
+      padding: 14px 16px 10px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .search-wrap {
+      position: relative;
+      margin-bottom: 10px;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 13px;
+      pointer-events: none;
+    }
+
+    .search-input {
+      width: 100%;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 8px 10px 8px 32px;
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .search-input:focus { border-color: var(--accent); }
+    .search-input::placeholder { color: var(--text-faint); }
+
+    .filter-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .filter-select {
+      flex: 1;
+      min-width: 120px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 6px 8px;
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 12px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .filter-select:focus { border-color: var(--accent); }
+
+    /* Ticket list scroll area */
+    .ticket-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px 0;
+    }
+
+    .ticket-list::-webkit-scrollbar { width: 4px; }
+    .ticket-list::-webkit-scrollbar-track { background: transparent; }
+    .ticket-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    /* Individual ticket card in list */
+    .ticket-item {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background 0.1s;
+      position: relative;
+    }
+
+    .ticket-item:hover { background: var(--bg3); }
+
+    .ticket-item.active {
+      background: var(--accent-glow);
+      border-left: 2px solid var(--accent);
+    }
+
+    .ticket-item-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+
+    .ticket-id {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--accent);
+    }
+
+    .ticket-date {
+      font-size: 11px;
+      color: var(--text-faint);
+    }
+
+    .ticket-name {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .ticket-issue {
+      font-size: 12px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 6px;
+    }
+
+    .ticket-tags {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+    }
+
+    /* =========================================================
+       STATUS BADGES
+    ========================================================= */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .badge-pending          { background: rgba(251,191,36,0.15);  color: var(--yellow); }
+    .badge-inprogress       { background: rgba(79,142,247,0.15);  color: var(--accent); }
+    .badge-waiting-third    { background: rgba(167,139,250,0.15); color: var(--purple); }
+    .badge-waiting-customer { background: rgba(251,146,60,0.15);  color: var(--orange); }
+    .badge-resolved         { background: rgba(52,211,153,0.15);  color: var(--green);  }
+
+    .badge-channel {
+      background: var(--bg3);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+
+    /* =========================================================
+       MIDDLE PANEL — ticket detail
+    ========================================================= */
+    .panel-detail {
+      grid-area: detail;
+      overflow-y: auto;
+      padding: 24px;
+      background: var(--bg);
+    }
+
+    .panel-detail::-webkit-scrollbar { width: 4px; }
+    .panel-detail::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    /* Empty state */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: var(--text-faint);
+      gap: 12px;
+      text-align: center;
+    }
+
+    .empty-state-icon {
+      font-size: 40px;
+      opacity: 0.3;
+    }
+
+    .empty-state p { font-size: 13px; }
+
+    /* Ticket detail card */
+    .detail-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+
+    .detail-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      gap: 12px;
+    }
+
+    .detail-ticket-id {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+
+    .detail-customer-name {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: -0.3px;
+    }
+
+    .detail-actions {
+      display: flex;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .btn {
+      border: none;
+      border-radius: var(--radius);
+      padding: 7px 14px;
+      font-family: var(--font);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+
+    .btn:hover { opacity: 0.8; }
+
+    .btn-edit   { background: var(--bg3); color: var(--text); border: 1px solid var(--border); }
+    .btn-save   { background: var(--green); color: #0f1117; }
+    .btn-cancel { background: var(--bg3); color: var(--text-muted); border: 1px solid var(--border); }
+
+    /* Detail info grid */
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .info-field label {
+      display: block;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 5px;
+    }
+
+    .info-field .field-value {
+      font-size: 13px;
+      color: var(--text);
+    }
+
+    /* Edit mode inputs */
+    .edit-input, .edit-select, .edit-textarea {
+      width: 100%;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 8px 10px;
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .edit-input:focus,
+    .edit-select:focus,
+    .edit-textarea:focus { border-color: var(--accent); }
+
+    .edit-textarea { resize: vertical; min-height: 80px; }
+
+    .section-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* Order info sub-card */
+    .order-card {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+      margin-top: 8px;
+    }
+
+    .order-card .order-id {
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    .order-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .order-row span:last-child { color: var(--text); }
+
+    /* =========================================================
+       RIGHT PANEL — insights
+    ========================================================= */
+    .panel-insights {
+      grid-area: insights;
+      background: var(--bg2);
+      border-left: 1px solid var(--border);
+      overflow-y: auto;
+      padding: 16px;
+    }
+
+    .panel-insights::-webkit-scrollbar { width: 4px; }
+    .panel-insights::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .insights-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 14px;
+    }
+
+    /* Stat tiles */
+    .stat-tile {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 14px;
+      margin-bottom: 8px;
+    }
+
+    .stat-tile-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .stat-tile-value {
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--text);
+      font-family: var(--mono);
+      line-height: 1;
+    }
+
+    /* Progress bar used in status breakdown */
+    .progress-item {
+      margin-bottom: 12px;
+    }
+
+    .progress-item-top {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      margin-bottom: 5px;
+    }
+
+    .progress-item-label { color: var(--text-muted); }
+    .progress-item-count { color: var(--text); font-family: var(--mono); }
+
+    .progress-bar {
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 2px;
+      transition: width 0.6s ease;
+    }
+
+    .insights-section {
+      margin-bottom: 20px;
+    }
+
+    /* Channel dots */
+    .channel-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 0;
+      font-size: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .channel-item:last-child { border-bottom: none; }
+
+    .channel-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      margin-right: 8px;
+      flex-shrink: 0;
+    }
+
+    .channel-name {
+      display: flex;
+      align-items: center;
+      color: var(--text-muted);
+    }
+
+    .channel-count {
+      color: var(--text);
+      font-family: var(--mono);
+    }
+
+    /* =========================================================
+       MODAL — new ticket
+    ========================================================= */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.65);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .modal {
+      background: var(--bg2);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      width: 540px;
+      max-width: 95vw;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 28px;
+      transform: translateY(12px);
+      transition: transform 0.2s;
+    }
+
+    .modal-overlay.open .modal {
+      transform: translateY(0);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+
+    .modal-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 20px;
+      cursor: pointer;
+      line-height: 1;
+      padding: 4px;
+    }
+
+    .modal-close:hover { color: var(--text); }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .form-field { display: flex; flex-direction: column; gap: 5px; }
+    .form-field.full { grid-column: 1 / -1; }
+
+    .form-label {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .form-input, .form-select, .form-textarea {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 9px 12px;
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .form-input:focus,
+    .form-select:focus,
+    .form-textarea:focus { border-color: var(--accent); }
+
+    .form-input::placeholder,
+    .form-textarea::placeholder { color: var(--text-faint); }
+
+    .form-textarea { resize: vertical; min-height: 80px; }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 8px;
+    }
+    // -------------------------------------------------------
+
+    /* =========================================================
+       TOAST NOTIFICATIONS
+    ========================================================= */
+    .toast-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      z-index: 200;
+    }
+
+    .toast {
+      background: var(--bg2);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      font-size: 13px;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: var(--shadow);
+      animation: slideIn 0.25s ease;
+      min-width: 240px;
+    }
+
+    .toast.success { border-left: 3px solid var(--green); }
+    .toast.error   { border-left: 3px solid var(--red);   }
+
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to   { transform: translateX(0);   opacity: 1; }
+    }
+
+    /* =========================================================
+       LOADING SPINNER
+    ========================================================= */
+    .spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .loading-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 32px;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    /* =========================================================
+       UTILITIES
+    ========================================================= */
+    .text-muted  { color: var(--text-muted); }
+    .mt-8  { margin-top: 8px; }
+    .mt-16 { margin-top: 16px; }
+
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 16px 0;
+    }
+  </style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- =====================================================
+       HEADER
+  ===================================================== -->
+  <header class="header">
+    <div class="header-brand">
+      <div class="header-logo">D</div>
+      <div>
+        <div class="header-title">Datastraw CRM</div>
+        <div class="header-subtitle">Support Ticket Management</div>
+      </div>
+    </div>
+
+    <div class="header-spacer"></div>
+
+    <div class="header-stat">
+      <div class="header-stat-num" id="hdr-total">—</div>
+      <div class="header-stat-label">Total tickets</div>
+    </div>
+    <div class="header-divider"></div>
+    <div class="header-stat">
+      <div class="header-stat-num" id="hdr-open">—</div>
+      <div class="header-stat-label">Open</div>
+    </div>
+    <div class="header-divider"></div>
+    <div class="header-stat">
+      <div class="header-stat-num" id="hdr-resolved">—</div>
+      <div class="header-stat-label">Resolved</div>
+    </div>
+
+    <div class="header-divider"></div>
+    <button class="btn-export" onclick="exportToCSV()">
+  ↓ Export CSV
+</button>
+    <button class="btn-new" onclick="openNewTicketModal()">
+      + New Ticket
+    </button>
+  </header>
+
+  <!-- =====================================================
+       LEFT PANEL — ticket list
+  ===================================================== -->
+  <aside class="panel-list">
+    <div class="panel-list-header">
+      <div class="search-wrap">
+        <span class="search-icon">⌕</span>
+        <input
+          class="search-input"
+          type="text"
+          id="search-input"
+          placeholder="Search by name, ID, email, phone…"
+          oninput="handleSearch(this.value)"
+        />
+      </div>
+      <div class="filter-row">
+        <select class="filter-select" id="filter-status" onchange="handleFilter()">
+          <option value="All">All statuses</option>
+          <option value="Pending">Pending</option>
+          <option value="In Progress">In Progress</option>
+          <option value="Waiting on Third Party">Waiting — 3rd Party</option>
+          <option value="Waiting on Customer">Waiting — Customer</option>
+          <option value="Resolved">Resolved</option>
+        </select>
+        <select class="filter-select" id="filter-channel" onchange="handleFilter()">
+          <option value="All">All channels</option>
+          <option value="WhatsApp">WhatsApp</option>
+          <option value="Instagram">Instagram</option>
+          <option value="Facebook">Facebook</option>
+          <option value="Emails">Email</option>
+          <option value="Calls">Calls</option>
+        </select>
+          <select class="filter-select" id="filter-escalation" onchange="handleFilter()">
+          <option value="All">All escalations</option>
+          <option value="None">None</option>
+          <option value="Senior Agent">Senior Agent</option>
+          <option value="Manager">Manager</option>
+          <option value="Courier Partner">Courier Partner</option>
+          <option value="Finance Team">Finance Team</option>
+        </select>
+      </div>
+    </div>
+    <div class="filter-row" style="margin-top:6px;">
+  <input type="date" class="filter-select" id="filter-date-from" onchange="handleFilter()" title="From date" />
+  <input type="date" class="filter-select" id="filter-date-to"   onchange="handleFilter()" title="To date" />
+</div>
+    <div class="ticket-list" id="ticket-list">
+      <div class="loading-bar">
+        <div class="spinner"></div>
+        Loading tickets…
+      </div>
+    </div>
+  </aside>
+
+  <!-- =====================================================
+       MIDDLE PANEL — ticket detail
+  ===================================================== -->
+  <main class="panel-detail" id="panel-detail">
+    <div class="empty-state">
+      <div class="empty-state-icon">📋</div>
+      <p style="font-size:15px; font-weight:500; color:var(--text-muted);">Select a ticket to view details</p>
+      <p>Click any ticket from the list on the left</p>
+    </div>
+  </main>
+
+  <!-- =====================================================
+       RIGHT PANEL — insights
+  ===================================================== -->
+  <aside class="panel-insights" id="panel-insights">
+    <div class="insights-title">Insights</div>
+    <div id="insights-content">
+      <div class="loading-bar">
+        <div class="spinner"></div>
+      </div>
+    </div>
+  </aside>
+
+</div><!-- /app -->
+
+<!-- =====================================================
+     MODAL — new ticket
+===================================================== -->
+<div class="modal-overlay" id="modal-overlay" onclick="handleOverlayClick(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Create New Ticket</div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+
+    <div class="form-grid">
+      <div class="form-field">
+        <label class="form-label">Customer name *</label>
+        <input class="form-input" id="f-name" placeholder="e.g. Priya Sharma" />
+      </div>
+      <div class="form-field">
+        <label class="form-label">Phone number</label>
+        <input class="form-input" id="f-phone" placeholder="e.g. 9876543210" />
+      </div>
+      <div class="form-field">
+        <label class="form-label">Email address</label>
+        <input class="form-input" id="f-email" type="email" placeholder="customer@email.com" />
+      </div>
+      <div class="form-field">
+        <label class="form-label">Order ID</label>
+        <input class="form-input" id="f-orderid" placeholder="e.g. ORD-1021" />
+      </div>
+      <div class="form-field">
+        <label class="form-label">Channel</label>
+        <select class="form-select" id="f-channel">
+          <option value="WhatsApp">WhatsApp</option>
+          <option value="Instagram">Instagram</option>
+          <option value="Facebook">Facebook</option>
+          <option value="Emails" selected>Email</option>
+          <option value="Calls">Calls</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Status</label>
+        <select class="form-select" id="f-status">
+          <option value="Pending" selected>Pending</option>
+          <option value="In Progress">In Progress</option>
+          <option value="Waiting on Third Party">Waiting — 3rd Party</option>
+          <option value="Waiting on Customer">Waiting — Customer</option>
+          <option value="Resolved">Resolved</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Escalation level</label>
+        <select class="form-select" id="f-escalation">
+          <option value="None" selected>None</option>
+          <option value="Senior Agent">Senior Agent</option>
+          <option value="Manager">Manager</option>
+          <option value="Courier Partner">Courier Partner</option>
+          <option value="Finance Team">Finance Team</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label class="form-label">Query theme</label>
+        <input class="form-input" id="f-theme" placeholder="e.g. Delivery Issue" />
+      </div>
+      <div class="form-field full">
+        <label class="form-label">Issue description *</label>
+        <textarea class="form-textarea" id="f-issue" placeholder="Describe the customer's issue in detail…"></textarea>
+      </div>
+      <div class="form-field full">
+        <label class="form-label">Action taken</label>
+        <input class="form-input" id="f-action" placeholder="What was done so far?" />
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-save" id="btn-submit" onclick="submitNewTicket()">Create Ticket</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div class="toast-container" id="toast-container"></div>
+
+<!-- =====================================================
+     JAVASCRIPT
+===================================================== -->
+<script>
+  // -------------------------------------------------------
+  //  STATE
+  // -------------------------------------------------------
+  var allTickets     = [];
+  var activeTicketId = null;
+  var editMode       = false;
+  var searchTimer    = null;
+
+  // -------------------------------------------------------
+  //  INIT — load tickets and stats on page load
+  // -------------------------------------------------------
+  window.onload = function() {
+    loadAllTickets();
+    loadInsights();
+  };
+
+  // -------------------------------------------------------
+  //  TICKET LOADING
+  // -------------------------------------------------------
+  function loadAllTickets() {
+    google.script.run
+      .withSuccessHandler(function(res) {
+        if (res.success) {
+          allTickets = res.tickets; 
+          renderTicketList(allTickets);
+          updateHeaderStats();
+        } else {
+          showToast("Failed to load tickets: " + res.error, "error");
+        }
+      })
+      .withFailureHandler(function(err) {
+        showToast("Connection error: " + err.message, "error");
+      })
+      .getAllTickets();
+  }
+
+  // -------------------------------------------------------
+  //  RENDER TICKET LIST
+  // -------------------------------------------------------
+  function renderTicketList(tickets) {
+    var list = document.getElementById("ticket-list");
+
+    if (tickets.length === 0) {
+      list.innerHTML = '<div class="empty-state" style="padding:40px 16px;"><p>No tickets found</p></div>';
+      return;
+    }
+
+    list.innerHTML = tickets.map(function(t) {
+      return '<div class="ticket-item' + (t.TicketID === activeTicketId ? ' active' : '') + '" onclick="selectTicket(\'' + t.TicketID + '\')">'
+        + '<div class="ticket-item-top">'
+        + '  <span class="ticket-id">' + escHtml(t.TicketID) + '</span>'
+        + '  <span class="ticket-date">' + shortDate(t.CreatedAt) + '</span>'
+        + '</div>'
+        + '<div class="ticket-name">' + escHtml(t.CustomerName) + '</div>'
+        + '<div class="ticket-issue">' + escHtml(t.IssueDescription) + '</div>'
+        + '<div class="ticket-tags">'
+        + '  <span class="badge ' + statusClass(t.Status) + '">' + escHtml(t.Status) + '</span>'
+        + '  <span class="badge badge-channel">' + escHtml(t.Channel) + '</span>'
+        + '</div>'
+        + '</div>';
+    }).join('');
+  }
+
+  // -------------------------------------------------------
+  //  SELECT AND SHOW TICKET DETAIL
+  // -------------------------------------------------------
+  function selectTicket(ticketId) {
+    activeTicketId = ticketId;
+    editMode = false;
+
+    // Highlight in list
+    document.querySelectorAll('.ticket-item').forEach(function(el) {
+      el.classList.toggle('active', el.getAttribute('onclick').indexOf(ticketId) > -1);
+    });
+
+    // Find locally first (faster)
+    var ticket = allTickets.find(function(t) { return t.TicketID === ticketId; });
+    if (ticket) renderTicketDetail(ticket, false);
+
+    // Also load linked order if any
+    if (ticket && ticket.OrderID) {
+      google.script.run
+        .withSuccessHandler(function(res) {
+          renderOrderSection(res);
+        })
+        .withFailureHandler(function() {})
+        .getOrderById(ticket.OrderID);
+    }
+  }
+
+  // -------------------------------------------------------
+  //  RENDER TICKET DETAIL PANEL
+  // -------------------------------------------------------
+  function renderTicketDetail(t, isEdit) {
+    var detail = document.getElementById("panel-detail");
+
+    if (isEdit) {
+      detail.innerHTML =
+        '<div class="detail-card">'
+        + '<div class="detail-header">'
+        + '  <div>'
+        + '    <div class="detail-ticket-id">' + escHtml(t.TicketID) + '</div>'
+        + '    <div class="detail-customer-name">Editing ticket</div>'
+        + '  </div>'
+        + '  <div class="detail-actions">'
+        + '    <button class="btn btn-cancel" onclick="cancelEdit()">Cancel</button>'
+        + '    <button class="btn btn-save" onclick="saveEdit()">Save Changes</button>'
+        + '  </div>'
+        + '</div>'
+
+        + '<div class="info-grid">'
+        + field("Customer name",  '<input class="edit-input" id="e-name"    value="' + escAttr(t.CustomerName)    + '">')
+        + field("Phone",          '<input class="edit-input" id="e-phone"   value="' + escAttr(t.Phone)           + '">')
+        + field("Email",          '<input class="edit-input" id="e-email"   value="' + escAttr(t.Email)           + '">')
+        + field("Order ID",       '<input class="edit-input" id="e-orderid" value="' + escAttr(t.OrderID)         + '">')
+        + field("Channel",        selectHtml("e-channel", ["WhatsApp","Instagram","Facebook","Emails","Calls"], t.Channel))
+        + field("Status",         selectHtml("e-status",  ["Pending","In Progress","Waiting on Third Party","Waiting on Customer","Resolved"], t.Status))
+        + field("Escalation",     selectHtml("e-esc",     ["None","Senior Agent","Manager","Courier Partner","Finance Team"], t.EscalationLevel))
+        + field("Query theme",    '<input class="edit-input" id="e-theme"   value="' + escAttr(t.QueryTheme)      + '">')
+        + '</div>'
+
+        + '<div class="section-title">Issue description</div>'
+        + '<textarea class="edit-textarea" id="e-issue">' + escHtml(t.IssueDescription) + '</textarea>'
+
+        + '<div class="section-title mt-16">Action taken</div>'
+        + '<input class="edit-input" id="e-action" value="' + escAttr(t.ActionTaken) + '">'
+        + '</div>'
+        + '<div id="order-section"></div>';
+
+    } else {
+      detail.innerHTML =
+        '<div class="detail-card">'
+        + '<div class="detail-header">'
+        + '  <div>'
+        + '    <div class="detail-ticket-id">' + escHtml(t.TicketID) + '</div>'
+        + '    <div class="detail-customer-name">' + escHtml(t.CustomerName) + '</div>'
+        + '  </div>'
+        + '  <div class="detail-actions">'
+        + '    <span class="badge ' + statusClass(t.Status) + '" style="font-size:12px;padding:4px 12px;">' + escHtml(t.Status) + '</span>'
+        + '    <button class="btn btn-edit" onclick="enterEditMode()">✎ Edit</button>'
+        + '    <button class="btn btn-cancel" onclick="confirmDelete(\'' + t.TicketID + '\')">🗑 Delete</button>'
+        + '  </div>'
+        + '</div>'
+
+        + '<div class="info-grid">'
+        + field("Email",          '<span class="field-value">' + (t.Email   || '—') + '</span>')
+        + field("Phone",          '<span class="field-value">' + (t.Phone   || '—') + '</span>')
+        + field("Order ID",       '<span class="field-value">' + (t.OrderID || '—') + '</span>')
+        + field("Channel",        '<span class="badge badge-channel">' + escHtml(t.Channel) + '</span>')
+        + field("Escalation",     '<span class="field-value">' + (t.EscalationLevel || 'None') + '</span>')
+        + field("Query theme",    '<span class="field-value">' + (t.QueryTheme      || '—')    + '</span>')
+        + field("Action taken",   '<span class="field-value">' + (t.ActionTaken     || '—')    + '</span>')
+        + field("Created",        '<span class="field-value">' + (t.CreatedAt       || '—')    + '</span>')
+        + '</div>'
+
+        + '<div class="section-title">Issue description</div>'
+        + '<p style="font-size:13px; color:var(--text); line-height:1.7;">' + escHtml(t.IssueDescription) + '</p>'
+        + '</div>'
+        + '<div id="order-section"></div>';
+    }
+  }
+
+  // -------------------------------------------------------
+  //  EDIT MODE
+  // -------------------------------------------------------
+  function enterEditMode() {
+    editMode = true;
+    var t = allTickets.find(function(x) { return x.TicketID === activeTicketId; });
+    if (t) renderTicketDetail(t, true);
+  }
+
+  function cancelEdit() {
+    editMode = false;
+    var t = allTickets.find(function(x) { return x.TicketID === activeTicketId; });
+    if (t) renderTicketDetail(t, false);
+  }
+
+  function saveEdit() {
+    var updates = {
+      customerName    : document.getElementById("e-name").value,
+      phone           : document.getElementById("e-phone").value,
+      email           : document.getElementById("e-email").value,
+      orderId         : document.getElementById("e-orderid").value,
+      channel         : document.getElementById("e-channel").value,
+      status          : document.getElementById("e-status").value,
+      escalationLevel : document.getElementById("e-esc").value,
+      queryTheme      : document.getElementById("e-theme").value,
+      issueDescription: document.getElementById("e-issue").value,
+      actionTaken     : document.getElementById("e-action").value
+    };
+
+    var btn = document.querySelector('.btn-save');
+    btn.textContent = "Saving…";
+    btn.disabled = true;
+
+    google.script.run
+      .withSuccessHandler(function(res) {
+        if (res.success) {
+          // Update local state
+          var idx = allTickets.findIndex(function(x) { return x.TicketID === activeTicketId; });
+          if (idx > -1) {
+            allTickets[idx].CustomerName     = updates.customerName;
+            allTickets[idx].Phone            = updates.phone;
+            allTickets[idx].Email            = updates.email;
+            allTickets[idx].OrderID          = updates.orderId;
+            allTickets[idx].Channel          = updates.channel;
+            allTickets[idx].Status           = updates.status;
+            allTickets[idx].EscalationLevel  = updates.escalationLevel;
+            allTickets[idx].QueryTheme       = updates.queryTheme;
+            allTickets[idx].IssueDescription = updates.issueDescription;
+            allTickets[idx].ActionTaken      = updates.actionTaken;
+          }
+          editMode = false;
+          renderTicketList(allTickets);
+          renderTicketDetail(allTickets[idx], false);
+          loadInsights();
+          showToast("Ticket updated successfully", "success");
+        } else {
+          showToast("Update failed: " + res.error, "error");
+          btn.textContent = "Save Changes";
+          btn.disabled = false;
+        }
+      })
+      .withFailureHandler(function(err) {
+        showToast("Error: " + err.message, "error");
+        btn.textContent = "Save Changes";
+        btn.disabled = false;
+      })
+      .updateTicket(activeTicketId, updates);
+  }
+
+  // -------------------------------------------------------
+  //  ORDER SECTION RENDER
+  // -------------------------------------------------------
+  function renderOrderSection(res) {
+    var sec = document.getElementById("order-section");
+    if (!sec) return;
+
+    if (!res || !res.success) {
+      sec.innerHTML = '';
+      return;
+    }
+
+    var o = res.order;
+    sec.innerHTML =
+      '<div class="detail-card">'
+      + '<div class="section-title">Linked order</div>'
+      + '<div class="order-card">'
+      + '  <div class="order-id">' + escHtml(o.OrderID) + '</div>'
+      + '  <div class="order-row"><span>Customer</span><span>' + escHtml(o.CustomerName) + '</span></div>'
+      + '  <div class="order-row"><span>Order date</span><span>' + escHtml(o.OrderDate)  + '</span></div>'
+      + '  <div class="order-row"><span>Order status</span><span>' + escHtml(o.Status)   + '</span></div>'
+      + '</div>'
+      + '</div>';
+  }
+
+  // -------------------------------------------------------
+  //  SEARCH  (debounced 400ms so we don't spam the backend)
+  // -------------------------------------------------------
+  function handleSearch(q) {
+  applySearchAndFilter();
+}
+
+function handleFilter() {
+  applySearchAndFilter();
+}
+
+function applySearchAndFilter() {
+  var q          = document.getElementById("search-input").value.trim().toLowerCase();
+  var status     = document.getElementById("filter-status").value;
+  var channel    = document.getElementById("filter-channel").value;
+  var escalation = document.getElementById("filter-escalation").value;
+  var dateFrom   = document.getElementById("filter-date-from") ? document.getElementById("filter-date-from").value : "";
+  var dateTo     = document.getElementById("filter-date-to")   ? document.getElementById("filter-date-to").value   : "";
+
+  var filtered = allTickets.filter(function(t) {
+
+    var matchSearch = !q
+      || String(t.TicketID         || "").toLowerCase().indexOf(q) > -1
+      || String(t.CustomerName     || "").toLowerCase().indexOf(q) > -1
+      || String(t.Email            || "").toLowerCase().indexOf(q) > -1
+      || String(t.Phone            || "").toLowerCase().indexOf(q) > -1
+      || String(t.OrderID          || "").toLowerCase().indexOf(q) > -1
+      || String(t.IssueDescription || "").toLowerCase().indexOf(q) > -1
+      || String(t.QueryTheme       || "").toLowerCase().indexOf(q) > -1;
+
+    var matchStatus     = (status     === "All") || t.Status          === status;
+    var matchChannel    = (channel    === "All") || t.Channel         === channel;
+    var matchEscalation = (escalation === "All") || t.EscalationLevel === escalation;
+
+    // Date range filter
+    var matchDate = true;
+    if (dateFrom || dateTo) {
+      // Parse ticket date — format is "01 May 2025, 10:00 AM"
+      var ticketDate = new Date(t.CreatedAt);
+      if (dateFrom) {
+        var from = new Date(dateFrom);
+        if (ticketDate < from) matchDate = false;
+      }
+      if (dateTo) {
+        var to = new Date(dateTo);
+        to.setHours(23, 59, 59); // include the whole end day
+        if (ticketDate > to) matchDate = false;
+      }
+    }
+
+    return matchSearch && matchStatus && matchChannel && matchEscalation && matchDate;
+  });
+
+  renderTicketList(filtered);
+}
+
+  // -------------------------------------------------------
+  //  NEW TICKET MODAL
+  // -------------------------------------------------------
+  function openNewTicketModal() {
+    document.getElementById("modal-overlay").classList.add("open");
+    document.getElementById("f-name").focus();
+  }
+
+  function closeModal() {
+    document.getElementById("modal-overlay").classList.remove("open");
+    clearModalForm();
+  }
+
+  function handleOverlayClick(e) {
+    if (e.target === document.getElementById("modal-overlay")) closeModal();
+  }
+
+  function clearModalForm() {
+    ["f-name","f-phone","f-email","f-orderid","f-theme","f-issue","f-action"].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) el.value = "";
+    });
+    document.getElementById("f-channel").value    = "Emails";
+    document.getElementById("f-status").value     = "Pending";
+    document.getElementById("f-escalation").value = "None";
+  }
+
+  function submitNewTicket() {
+    var name  = document.getElementById("f-name").value.trim();
+    var issue = document.getElementById("f-issue").value.trim();
+
+    if (!name)  { showToast("Customer name is required",    "error"); return; }
+    if (!issue) { showToast("Issue description is required","error"); return; }
+
+    var btn = document.getElementById("btn-submit");
+    btn.textContent = "Creating…";
+    btn.disabled = true;
+
+    var data = {
+      customerName    : name,
+      phone           : document.getElementById("f-phone").value.trim(),
+      email           : document.getElementById("f-email").value.trim(),
+      orderId         : document.getElementById("f-orderid").value.trim(),
+      channel         : document.getElementById("f-channel").value,
+      status          : document.getElementById("f-status").value,
+      escalationLevel : document.getElementById("f-escalation").value,
+      queryTheme      : document.getElementById("f-theme").value.trim(),
+      issueDescription: issue,
+      actionTaken     : document.getElementById("f-action").value.trim()
+    };
+
+    google.script.run
+      .withSuccessHandler(function(res) {
+        btn.textContent = "Create Ticket";
+        btn.disabled = false;
+
+        if (res.success) {
+          allTickets.unshift(res.ticket);
+          renderTicketList(allTickets);
+          updateHeaderStats();
+          loadInsights();
+          closeModal();
+          showToast("Ticket " + res.ticketId + " created!", "success");
+          selectTicket(res.ticketId);
+
+          // Send email notification
+          google.script.run
+            .sendTicketCreatedEmail(
+              res.ticketId,
+              res.ticket.CustomerName,
+              res.ticket.IssueDescription,
+              res.ticket.Channel,
+              res.ticket.Status
+            );
+        } else {
+          showToast("Error: " + res.error, "error");
+        }
+      })
+      .withFailureHandler(function(err) {
+        btn.textContent = "Create Ticket";
+        btn.disabled = false;
+        showToast("Failed to create ticket: " + err.message, "error");
+      })
+      .createTicket(data);
+  }
+
+  // -------------------------------------------------------
+  //  INSIGHTS PANEL
+  // -------------------------------------------------------
+  function loadInsights() {
+    google.script.run
+      .withSuccessHandler(function(res) {
+        if (res.success) renderInsights(res);
+      })
+      .withFailureHandler(function() {})
+      .getDashboardStats();
+  }
+
+  function renderInsights(stats) {
+  var total    = stats.total;
+  var sc       = stats.statusCounts;
+  var cc       = stats.channelCounts;
+  var resolved = sc["Resolved"] || 0;
+  var open     = total - resolved;
+  var resRate  = total > 0 ? Math.round((resolved / total) * 100) : 0;
+
+  // Most active channel
+  var topChannel = Object.keys(cc).reduce(function(a, b) {
+    return (cc[a] || 0) > (cc[b] || 0) ? a : b;
+  }, "None");
+
+  // Pending tickets
+  var pending = sc["Pending"] || 0;
+
+  document.getElementById("hdr-total")    && (document.getElementById("hdr-total").textContent    = total);
+  document.getElementById("hdr-open")     && (document.getElementById("hdr-open").textContent     = open);
+  document.getElementById("hdr-resolved") && (document.getElementById("hdr-resolved").textContent = resolved);
+
+  var statusList = [
+    { label: "Pending",             key: "Pending",                  color: "#fbbf24" },
+    { label: "In Progress",         key: "In Progress",              color: "#4f8ef7" },
+    { label: "Waiting — 3rd Party", key: "Waiting on Third Party",   color: "#a78bfa" },
+    { label: "Waiting — Customer",  key: "Waiting on Customer",      color: "#fb923c" },
+    { label: "Resolved",            key: "Resolved",                 color: "#34d399" }
+  ];
+
+  var channelColors = {
+    WhatsApp: "#25d366", Instagram: "#e1306c",
+    Facebook: "#4267b2", Emails: "#4f8ef7", Calls: "#fb923c"
+  };
+
+  var html =
+    // ---- KEY METRICS ROW ----
+    '<div class="insights-section">'
+    + '<div class="insights-title">Key Metrics</div>'
+
+    + '<div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px;">'
+
+    + '<div class="stat-tile">'
+    + '  <div class="stat-tile-label">Resolution rate</div>'
+    + '  <div class="stat-tile-value" style="color:var(--green)">' + resRate + '%</div>'
+    + '</div>'
+
+    + '<div class="stat-tile">'
+    + '  <div class="stat-tile-label">Open tickets</div>'
+    + '  <div class="stat-tile-value" style="color:var(--accent)">' + open + '</div>'
+    + '</div>'
+
+    + '<div class="stat-tile">'
+    + '  <div class="stat-tile-label">Pending</div>'
+    + '  <div class="stat-tile-value" style="color:var(--yellow)">' + pending + '</div>'
+    + '</div>'
+
+    + '<div class="stat-tile">'
+    + '  <div class="stat-tile-label">Top channel</div>'
+    + '  <div style="font-size:13px; font-weight:600; color:var(--text); margin-top:4px;">' + topChannel + '</div>'
+    + '</div>'
+
+    + '</div>'
+    + '</div>'
+
+    // ---- STATUS BREAKDOWN ----
+    + '<div class="insights-section">'
+    + '<div class="insights-title">By Status</div>'
+    + statusList.map(function(s) {
+        var count = sc[s.key] || 0;
+        var pct   = total > 0 ? Math.round(count / total * 100) : 0;
+        return '<div class="progress-item">'
+          + '<div class="progress-item-top">'
+          + '  <span class="progress-item-label">' + s.label + '</span>'
+          + '  <span class="progress-item-count">' + count + ' <span style="color:var(--text-faint);font-size:10px;">(' + pct + '%)</span></span>'
+          + '</div>'
+          + '<div class="progress-bar"><div class="progress-fill" style="width:' + pct + '%;background:' + s.color + '"></div></div>'
+          + '</div>';
+      }).join('')
+    + '</div>'
+
+    // ---- MINI BAR CHART ----
+    + '<div class="insights-section">'
+    + '<div class="insights-title">Ticket Volume Chart</div>'
+    + '<div style="display:flex; align-items:flex-end; gap:6px; height:80px; margin-bottom:6px;">'
+    + statusList.map(function(s) {
+        var count = sc[s.key] || 0;
+        var pct   = total > 0 ? Math.round(count / total * 100) : 0;
+        var barH  = total > 0 ? Math.max(4, Math.round((count / total) * 70)) : 4;
+        return '<div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:4px;">'
+          + '<span style="font-size:10px; color:var(--text-muted);">' + count + '</span>'
+          + '<div style="width:100%; height:' + barH + 'px; background:' + s.color + '; border-radius:3px 3px 0 0; opacity:0.85;"></div>'
+          + '</div>';
+      }).join('')
+    + '</div>'
+    + '<div style="display:flex; gap:6px; flex-wrap:wrap;">'
+    + statusList.map(function(s) {
+        return '<div style="display:flex; align-items:center; gap:3px; font-size:10px; color:var(--text-muted);">'
+          + '<div style="width:6px;height:6px;border-radius:50%;background:' + s.color + '"></div>'
+          + s.label + '</div>';
+      }).join('')
+    + '</div>'
+    + '</div>'
+
+    // ---- BY CHANNEL ----
+    + '<div class="insights-section">'
+    + '<div class="insights-title">By Channel</div>'
+    + Object.keys(cc).map(function(ch) {
+        var count = cc[ch] || 0;
+        var pct   = total > 0 ? Math.round(count / total * 100) : 0;
+        return '<div class="channel-item">'
+          + '<span class="channel-name"><span class="channel-dot" style="background:' + (channelColors[ch] || "#888") + '"></span>' + ch + '</span>'
+          + '<span style="display:flex; align-items:center; gap:6px;">'
+          + '<span style="font-size:10px; color:var(--text-faint);">' + pct + '%</span>'
+          + '<span class="channel-count">' + count + '</span>'
+          + '</span>'
+          + '</div>';
+      }).join('')
+    + '</div>';
+
+  document.getElementById("insights-content").innerHTML = html;
+}
+  // -------------------------------------------------------
+  //  HEADER STATS
+  // -------------------------------------------------------
+  function updateHeaderStats() {
+    var total    = allTickets.length;
+    var resolved = allTickets.filter(function(t) { return t.Status === "Resolved"; }).length;
+    var open     = total - resolved;
+
+    var el;
+    el = document.getElementById("hdr-total");    if (el) el.textContent = total;
+    el = document.getElementById("hdr-open");     if (el) el.textContent = open;
+    el = document.getElementById("hdr-resolved"); if (el) el.textContent = resolved;
+  }
+
+  // -------------------------------------------------------
+  //  HELPERS
+  // -------------------------------------------------------
+
+  // Returns CSS class for a status string
+  function statusClass(s) {
+    var map = {
+      "Pending"               : "badge-pending",
+      "In Progress"           : "badge-inprogress",
+      "Waiting on Third Party": "badge-waiting-third",
+      "Waiting on Customer"   : "badge-waiting-customer",
+      "Resolved"              : "badge-resolved"
+    };
+    return map[s] || "badge-pending";
+  }
+
+  // Returns a shortened date string e.g. "12 May"
+  function shortDate(dateStr) {
+    if (!dateStr) return "";
+    var parts = dateStr.split(",")[0].split(" ");
+    return parts[0] + " " + parts[1];
+  }
+
+  // Wraps in .info-field div
+  function field(label, valueHtml) {
+    return '<div class="info-field"><label>' + label + '</label>' + valueHtml + '</div>';
+  }
+
+  // Renders a <select> with the given options, pre-selected value
+  function selectHtml(id, options, selected) {
+    return '<select class="edit-select" id="' + id + '">'
+      + options.map(function(o) {
+          return '<option value="' + escAttr(o) + '"' + (o === selected ? ' selected' : '') + '>' + escHtml(o) + '</option>';
+        }).join('')
+      + '</select>';
+  }
+
+  // Escapes HTML special chars for safe innerHTML insertion
+  function escHtml(str) {
+    if (str === null || str === undefined) return "";
+    return String(str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  // Escapes for use inside HTML attribute values
+  function escAttr(str) {
+    if (str === null || str === undefined) return "";
+    return String(str)
+      .replace(/&/g, "&amp;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
+//  CSV EXPORT
+// -------------------------------------------------------
+     function exportToCSV() {
+  if (allTickets.length === 0) {
+    showToast("No tickets to export", "error");
+    return;
+  }
+
+  showToast("Preparing CSV download...", "success");
+
+  google.script.run
+    .withSuccessHandler(function(res) {
+      if (res.success) {
+        // Opens the download link in a new tab
+        window.open(res.url, "_blank");
+        showToast("CSV ready — check your new tab!", "success");
+      } else {
+        showToast("Export failed: " + res.error, "error");
+      }
+    })
+    .withFailureHandler(function(err) {
+      showToast("Export failed: " + err.message, "error");
+    })
+    .getCSVDownloadUrl();
+}
+    function confirmDelete(ticketId) {
+  if (!confirm("Are you sure you want to delete " + ticketId + "? This cannot be undone.")) return;
+
+  google.script.run
+    .withSuccessHandler(function(res) {
+      if (res.success) {
+        // Remove from local array
+        allTickets = allTickets.filter(function(t) { return t.TicketID !== ticketId; });
+        renderTicketList(allTickets);
+        updateHeaderStats();
+        loadInsights();
+        // Clear detail panel
+        document.getElementById("panel-detail").innerHTML =
+          '<div class="empty-state">'
+          + '<div class="empty-state-icon">📋</div>'
+          + '<p style="font-size:15px;font-weight:500;color:var(--text-muted);">Select a ticket to view details</p>'
+          + '</div>';
+        activeTicketId = null;
+        showToast("Ticket " + ticketId + " deleted", "success");
+      } else {
+        showToast("Delete failed: " + res.error, "error");
+      }
+    })
+    .withFailureHandler(function(err) {
+      showToast("Error: " + err.message, "error");
+    })
+    .deleteTicket(ticketId);
+}
+
+  // -------------------------------------------------------
+  //  TOAST NOTIFICATIONS
+  // -------------------------------------------------------
+  function showToast(msg, type) {
+    var container = document.getElementById("toast-container");
+    var toast = document.createElement("div");
+    toast.className = "toast " + (type || "success");
+    toast.innerHTML = (type === "error" ? "✕ " : "✓ ") + escHtml(msg);
+    container.appendChild(toast);
+    setTimeout(function() {
+      toast.style.opacity = "0";
+      toast.style.transition = "opacity 0.3s";
+      setTimeout(function() { toast.remove(); }, 300);
+    }, 3000);
+  }
+</script>
+</body>
+</html>
