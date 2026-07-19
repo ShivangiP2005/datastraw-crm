@@ -1,6 +1,6 @@
-# Datastraw Support CRM
+# Support CRM
 
-A fully functional web-based customer support ticketing system built for the Datastraw Technologies hiring assignment. Handles support tickets, customer data, order information, email notifications, and analytics all without a traditional server or database.
+A fully functional web-based customer support ticketing system. Handles support tickets, customer data, order information, email notifications, and analytics all without a traditional server or database.
 
 **Live Demo:** https://script.google.com/macros/s/AKfycbxsbCXO62Sehn3Lhbh4R_DC_Y-qgmTauE-iFc_qTcEDVFW6VN9odPFnFekGp9OUxA0Kfg/exec 
 
@@ -175,4 +175,4 @@ datastraw-crm/
 
 ---
 
-Built by Shivangi Pandey for the Datastraw Technologies Hiring Assignment.
+Built by Shivangi Pandey.
